@@ -1,7 +1,7 @@
 from flask import Flask,render_template,request
 import sqlite3
 from flask import g
-
+import hashlib
 DATABASE = '../database.db'
 
 app = Flask(__name__)
@@ -43,14 +43,22 @@ def hello():
 @app.route('/signup/',methods=['POST', 'GET'])
 def signup():
     if request.method=='POST':
-       username=request.form['username']
-       password=request.form['password']
-       email=request.form['email']
-       name=request.form['name']
-       print(name)
-       return "Name : "+request.method+"  "+username
+        with sqlite3.connect(DATABASE) as con:
+            cur = con.cursor()
+            username=request.form['username']
+            password=request.form['password']
+            email=request.form['emailid']
+            name=request.form['name']
+            salt = '5xy'
+            actualpass=password+salt
+            h = hashlib.md5(actualpass.encode())
+            cur.execute('INSERT INTO users VALUES(?, ?, ?, ?);',(username,actualpass,email,name))
+            con.commit()
+            # con.close()
+            print(name)
+            return "Name : "+request.method+"  "+username
     else:
         return render_template('signup.html')
 
 if __name__ == '__main__':
-    app.run(port=8000,debug = True)
+    app.run(port=5001,debug = True)
