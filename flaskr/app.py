@@ -21,15 +21,21 @@ app = Flask(__name__)
 
 conn = sqlite3.connect(DATABASE)
 c = conn.cursor()
-c.execute('''CREATE TABLE IF NOT EXISTS blog (id integer, title varchar(64), slug varchar(32), 
+c.execute('''CREATE TABLE IF NOT EXISTS blog (id integer, title varchar(64), slug varchar(32),
         body text, date text, PRIMARY KEY (id));''')
 
-c.execute('''CREATE TABLE IF NOT EXISTS users(username varchar(16), password varchar(64), 
+c.execute('''CREATE TABLE IF NOT EXISTS users(username varchar(16), password varchar(64),
         email varchar(64), name varchar(32), PRIMARY KEY(username), UNIQUE(email));''')
 
-c.execute('''CREATE TABLE IF NOT EXISTS postedby (id integer, username varchar(16), 
+c.execute('''CREATE TABLE IF NOT EXISTS postedby (id integer, username varchar(16),
         FOREIGN KEY(id) REFERENCES blog(id), FOREIGN KEY(username) REFERENCES users(username));''')
 
+c.execute("INSERT INTO users VALUES ('hri','abc','xyz@gmail.com','Hrishabh');")
+c.execute("INSERT INTO blog VALUES ('1','qwe','qwe','dvfdvfdvfdvdfvfdv','2006-01-05');")
+c.execute('SELECT * FROM blog;')
+
+conn.commit()
+print(c.fetchone())
 @app.route('/')
 def hello():
     return "Hello World!"
