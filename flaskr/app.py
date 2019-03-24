@@ -60,5 +60,30 @@ def signup():
     else:
         return render_template('signup.html')
 
+@app.route('/login/')
+def login():
+    error = ''
+    if request.method == 'POST':
+        with sqlite3.connect(DATABASE) as c:
+            cur = c.cursor()
+            username = request.form['username']
+            password = request.form['password']
+            received_pass = password+'5xy'
+            h = hashlib.md5(received_pass.encode())
+            data = cur.execute("SELECT * FROM users WHERE username = (%s)",username)
+            data = c.fetchone()[2]
+            if h == data:
+                session['logged_in']=True
+                session['username']=username
+
+                flash('You are now logged in')
+                print('You are logged in')
+            else:
+                error="Invalid credentials"
+
+    else:
+        return render_template('login.html')
+
+
 if __name__ == '__main__':
     app.run(port=5001,debug = True)
