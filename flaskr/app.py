@@ -1,6 +1,6 @@
 from flask import Flask,render_template,request, session, flash
 import sqlite3
-import datetime
+import datetime, time
 from flask import g
 import hashlib
 DATABASE = '../database.db'
@@ -23,14 +23,14 @@ app.secret_key = "thisisaserceretkey"
 
 conn = sqlite3.connect(DATABASE)
 c = conn.cursor()
-c.execute('''CREATE TABLE IF NOT EXISTS blog (id integer AUTO_INCREMENT, title varchar(64) NOT NULL,
+c.execute('''CREATE TABLE IF NOT EXISTS blog (id integer NOT NULL, title varchar(64) NOT NULL,
         slug varchar(32) NOT NULL, body text NOT NULL, date text, username varchar(16) NOT NULL,
         PRIMARY KEY (id), FOREIGN KEY(username) REFERENCES users(username));''')
 
-c.execute('''CREATE TABLE IF NOT EXISTS users(username varchar(16), password varchar(64) NOT NULL,
+c.execute('''CREATE TABLE IF NOT EXISTS users(username varchar(16) NOT NULL, password varchar(64) NOT NULL,
         join_date text, name varchar(32) NOT NULL, PRIMARY KEY(username));''')
 
-c.execute('''CREATE TABLE IF NOT EXISTS email (mail varchar(64), username varchar(16),
+c.execute('''CREATE TABLE IF NOT EXISTS email (mail varchar(64) NOT NULL, username varchar(16),
         FOREIGN KEY(username) REFERENCES users(username), PRIMARY KEY(mail, username),
         UNIQUE(mail, username));''')
 
@@ -38,7 +38,7 @@ c.execute('''CREATE TABLE IF NOT EXISTS wow (blog_id integer NOT NULL, username 
         status integer NOT NULL, FOREIGN KEY(blog_id) REFERENCES blog(id),
         FOREIGN KEY(username) REFERENCES users(username), PRIMARY KEY(blog_id, username));''')
 
-c.execute('''CREATE TABLE IF NOT EXISTS comment (id integer AUTO_INCREMENT, username varchar(16) NOT NULL,
+c.execute('''CREATE TABLE IF NOT EXISTS comment (id integer NOT NULL, username varchar(16) NOT NULL,
         data text NOT NULL, blog_id integer NOT NULL, date text NOT NULL,
         PRIMARY KEY(id), FOREIGN KEY(blog_id) REFERENCES blog(id),
         FOREIGN KEY(username) REFERENCES users(username))''')
@@ -55,7 +55,11 @@ conn.close()
 # print(c.fetchone())
 @app.route('/')
 def index():
-    return render_template('index.html')
+    with sqlite3.connect(DATABASE) as c:
+        cur = c.cursor()
+        cur.execute('SELECT * FROM blog ORDER BY date LIMIT 10;')
+        print(cur.fetchone()[0])
+        return render_template('index.html')
 
 @app.route('/signup/',methods=['POST', 'GET'])
 def signup():
@@ -118,7 +122,7 @@ def test():
 
 @app.route('/create_blog/',methods=['GET','POST'])
 def create_blog():
-    if request.method=="POST":
+    if request.method=='POST':
         with sqlite3.connect(DATABASE) as c:
             cur = c.cursor()
             title = request.form['title']
@@ -128,13 +132,28 @@ def create_blog():
             science = request.form.getlist('science')
             technology = request.form.getlist('technology')
             computer = request.form.getlist('computer')
-            print(art)
-            print(science)
-            print(technology)
-            print(computer)
-            return "Created"
+            if (session.get('username') != None):
+                id = int(time.time()*1000)
+                cur.execute('INSERT INTO blog VALUES(?, ?, ?, ?, ?, ?)',
+                    (id, title, slug, body, str(datetime.datetime.now()), session['username'], ))
+                print(cur.rowcount)
+                if len(art) and art[0] == 'on':
+                    i = cur.execute('INSERT INTO category VALUES(?, ?)', (id, 'art'))
+                if len(science) and science[0] == 'on':
+                    i = cur.execute('INSERT INTO category VALUES(?, ?)', (id, 'science'))
+                if len(technology) and technology[0] == 'on':
+                    i = cur.execute('INSERT INTO category VALUES(?, ?)', (id, 'technology'))
+                if len(computer) and computer[0] == 'on':
+                    i = cur.execute('INSERT INTO category VALUES(?, ?)', (id, 'computer'))
+                c.commit()
+                return "Created"
+            else:
+                return "You are not logged in."
     else:
-        return render_template('create_blog.html')
+        if (session.get('username') == None):
+            return "You need to be logged in"
+        else:
+            return render_template('create_blog.html')
 
 
 
