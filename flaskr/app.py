@@ -58,8 +58,9 @@ def index():
     with sqlite3.connect(DATABASE) as c:
         cur = c.cursor()
         cur.execute('SELECT * FROM blog ORDER BY date LIMIT 10;')
-        print(cur.fetchone()[0])
-        return render_template('index.html')
+        blogs = cur.fetchall()
+        print(blogs)
+        return render_template('index.html',blogs=blogs)
 
 @app.route('/signup/',methods=['POST', 'GET'])
 def signup():
