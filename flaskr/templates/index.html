@@ -84,10 +84,10 @@
 <div class="col-md-12">
 
   {% for blog in blogs %}
-    <h1>{{blog[1]}}</h1>
-    <p>{{blog[2]}}...<br><a href="#"><b>Read More</b></a></p>
+    <h1><a href="./blog/{{blog[2]}}/{{blog[0]}}">{{blog[1]}}</a></h1>
+    <p>{{blog[3]}}...<br><a href="./blog/{{blog[2]}}/{{blog[0]}}"><b>Read More</b></a></p>
     <div>
-<span class="badge">{{ blog[3] }}</span><div class="pull-right"><span class="label label-default">{{ blog[5] }}</span>
+<span class="badge">{{ blog[4] }}</span><div class="pull-right"><span class="label label-default">{{ blog[5] }}</span>
      </div>
     <hr>
   {% endfor %}
