@@ -169,7 +169,7 @@ def search():
         category = request.form['category']
         with sqlite3.connect(DATABASE) as c:
             cur = c.cursor()
-            cur.execute('SELECT * FROM blog WHERE username LIKE \'%'+author+'%\' OR title LIKE \'%'+title+'%\' OR _id IN (SELECT blog_id FROM category WHERE type = ?);', [category])
+            cur.execute('SELECT * FROM blog WHERE username LIKE \'%'+author+'%\' OR title LIKE \'%'+title+'%\' OR id IN (SELECT blog_id FROM category WHERE type = ?);', [category])
             print(cur.fetchall())
             return cur.fetchall()
             c.close()
