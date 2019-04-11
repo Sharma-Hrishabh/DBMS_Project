@@ -169,9 +169,25 @@ def search():
         category = request.form['category']
         with sqlite3.connect(DATABASE) as c:
             cur = c.cursor()
-            cur.execute('SELECT * FROM blog WHERE username LIKE \'%'+author+'%\' OR title LIKE \'%'+title+'%\' OR id IN (SELECT blog_id FROM category WHERE type = ?);', [category])
-            print(cur.fetchall())
-            return cur.fetchall()
+            query = 'SELECT * FROM blog WHERE '
+            if author != "":
+                query += 'username LIKE \'%'+author+'%\''
+            if title != "":
+                if len(query) > len('SELECT * FROM blog WHERE '):
+                    query += ' OR '
+                query += 'title LIKE \'%'+title+'%\''
+            # if author != "":
+            #     query += '\'%'+author+'%\''
+            if category != "":
+                if len(query) > len('SELECT * FROM blog WHERE '):
+                    query += ' OR '
+                query += 'id IN (SELECT blog_id FROM category WHERE type = ?);'
+                cur.execute(query, [category])
+            else:
+                cur.execute(query + ';')
+                
+            blogs = cur.fetchall()
+            return render_template('search.html',blogs=blogs)
             c.close()
 
 @app.route('/blog/<slug>/<id>', methods=['GET'])
