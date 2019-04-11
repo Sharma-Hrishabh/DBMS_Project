@@ -118,7 +118,16 @@ def test():
 
 @app.route('/create_blog/',methods=['GET','POST'])
 def create_blog():
-    return render_template('create_blog.html')
+    if request.method=="POST":
+        with sqlite3.connect(DATABASE) as c:
+            cur = c.cursor()
+            title = request.form['title']
+            slug = request.form['slug']
+            body = request.form['body']
+            print(title)
+            return "HELLO"
+    else:
+        return render_template('create_blog.html')
 
 
 
