@@ -29,11 +29,11 @@ c.execute('''CREATE TABLE IF NOT EXISTS blog (id integer AUTO_INCREMENT, title v
 
 c.execute('''CREATE TABLE IF NOT EXISTS users(username varchar(16), password varchar(64) NOT NULL,
         join_date text, name varchar(32) NOT NULL, PRIMARY KEY(username));''')
-        
+
 c.execute('''CREATE TABLE IF NOT EXISTS email (mail varchar(64), username varchar(16),
         FOREIGN KEY(username) REFERENCES users(username), PRIMARY KEY(mail, username),
         UNIQUE(mail, username));''')
-        
+
 c.execute('''CREATE TABLE IF NOT EXISTS wow (blog_id integer NOT NULL, username varchar(16) NOT NULL,
         status integer NOT NULL, FOREIGN KEY(blog_id) REFERENCES blog(id),
         FOREIGN KEY(username) REFERENCES users(username), PRIMARY KEY(blog_id, username));''')
@@ -114,6 +114,14 @@ def test():
     else:
         print(session.get('logged_in'))
         return 'Undefined User'
+
+
+@app.route('/create_blog/',methods=['GET'])
+def create_blog():
+    return render_template('create_blog.html')
+
+
+
 
 if __name__ == '__main__':
     app.run(port=5001,debug = True)
