@@ -29,7 +29,8 @@ c.execute('''CREATE TABLE IF NOT EXISTS users(username varchar(16), password var
         join_date text, name varchar(32), PRIMARY KEY(username));''')
 
 c.execute('''CREATE TABLE IF NOT EXISTS email (mail varchar(64), username varchar(16),
-        FOREIGN KEY(username) REFERENCES users(username), PRIMARY KEY(mail, username));''')
+        FOREIGN KEY(username) REFERENCES users(username), PRIMARY KEY(mail, username),
+        UNIQUE(mail, username));''')
 
 c.execute('''CREATE TABLE IF NOT EXISTS wow (blog_id integer, username varchar(16), status integer,
         FOREIGN KEY(blog_id) REFERENCES blog(id), FOREIGN KEY(username) REFERENCES users(username),
@@ -68,9 +69,9 @@ def signup():
             print(h.hexdigest())
             cur.execute('INSERT INTO users VALUES(?, ?, ?, ?);',(username,h.hexdigest(),email,name))
             con.commit()
-            con.close()
             print(name)
             return "Name : "+request.method+"  "+username
+            con.close()
     else:
         return render_template('signup.html')
 
@@ -85,13 +86,13 @@ def login():
             received_pass = password+'5xy'
             h = hashlib.md5(received_pass.encode())
             print(h.hexdigest())
-            data = cur.execute("SELECT * FROM users WHERE username = (%s)",username)
-            data = c.fetchone()[1]
+            data = cur.execute("SELECT * FROM users WHERE username = ?",[username])
+            data = cur.fetchone()[1]
             print(data)
             if h.hexdigest() == data:
-                session['logged_in']=True
-                session['username']=username
-                flash('You are now logged in')
+                # session['logged_in']=True
+                # session['username']=username
+                # flash('You are now logged in')
                 print('You are logged in')
                 return('Login Successful!')
             else:
