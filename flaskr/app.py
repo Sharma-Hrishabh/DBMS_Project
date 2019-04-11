@@ -1,5 +1,6 @@
 from flask import Flask,render_template,request, session, flash
 import sqlite3
+import json
 import datetime, time
 from flask import g
 import hashlib
@@ -61,6 +62,7 @@ def index():
         blogs = cur.fetchall()
         print(blogs)
         return render_template('index.html',blogs=blogs)
+        c.close()
 
 @app.route('/signup/',methods=['POST', 'GET'])
 def signup():
@@ -106,6 +108,7 @@ def login():
                 return('Login Successful!')
             else:
                 return("Invalid credentials!")
+            c.close()
     else:
         return render_template('login.html')
 
@@ -150,14 +153,26 @@ def create_blog():
                 return "Created"
             else:
                 return "You are not logged in."
+            c.close()
     else:
         if (session.get('username') == None):
             return "You need to be logged in"
         else:
             return render_template('create_blog.html')
 
-
-
+@app.route('/search', methods=['GET', 'POST'])
+def search():
+    if request.method == 'POST':
+        author = request.form['author']
+        title = request.form['title']
+        year = request.form['year']
+        category = request.form['category']
+        with sqlite3.connect(DATABASE) as c:
+            cur = c.cursor()
+            cur.execute('SELECT * FROM blog WHERE username LIKE \'%'+author+'%\' OR title LIKE \'%'+title+'%\' OR _id IN (SELECT blog_id FROM category WHERE type = ?);', [category])
+            print(cur.fetchall())
+            return cur.fetchall()
+            c.close()
 
 if __name__ == '__main__':
     app.run(port=5001,debug = True)
