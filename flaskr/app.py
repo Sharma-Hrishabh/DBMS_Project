@@ -124,8 +124,12 @@ def create_blog():
             title = request.form['title']
             slug = request.form['slug']
             body = request.form['body']
+            art = request.form['art']
+            art = request.form['science']
+            art = request.form['technology']
+            art = request.form['computer']
             print(title)
-            return "HELLO"
+            return "Created"
     else:
         return render_template('create_blog.html')
 
