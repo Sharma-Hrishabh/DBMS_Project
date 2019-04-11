@@ -173,16 +173,16 @@ def search():
             print(cur.fetchall())
             return cur.fetchall()
             c.close()
-            
+
 @app.route('/blog/<slug>/<id>', methods=['GET'])
 def blog(slug, id):
     print(slug, id)
     with sqlite3.connect(DATABASE) as c:
         cur = c.cursor()
         cur.execute('SELECT * FROM blog where id = ?', [id])
-        print(cur.fetchall())
-        return "hello"
-    
+        blog = cur.fetchall()[0]
+        return render_template('blog_view.html',blog=blog)
+
 
 if __name__ == '__main__':
     app.run(port=5001,debug = True)
