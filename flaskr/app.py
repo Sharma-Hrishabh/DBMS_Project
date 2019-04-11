@@ -125,9 +125,9 @@ def create_blog():
             slug = request.form['slug']
             body = request.form['body']
             art = request.form['art']
-            art = request.form['science']
-            art = request.form['technology']
-            art = request.form['computer']
+            science = request.form['science']
+            technology = request.form['technology']
+            computer = request.form['computer']
             print(title)
             return "Created"
     else:
