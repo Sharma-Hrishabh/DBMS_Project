@@ -116,7 +116,7 @@ def test():
         return 'Undefined User'
 
 
-@app.route('/create_blog/',methods=['GET'])
+@app.route('/create_blog/',methods=['GET','POST'])
 def create_blog():
     return render_template('create_blog.html')
 
