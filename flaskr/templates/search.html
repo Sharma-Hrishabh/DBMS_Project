@@ -41,9 +41,25 @@
             <h1 class="text-center">Find Your Blog</h1>
             <form action="/search" method="POST">
   		    <div class="form-group">
-                  <input type="text" class="form-control text-center" style="padding:10px;" name="title" placeholder="Title">
+                  <!-- <select name="acheck">
+                      <option value="or" selected>OR</option>
+                      <option value="and">AND</option>
+                  </select> -->
                   <input type="text" class="form-control text-center" style="padding:10px;" name="author" placeholder="Author">
+                  <select name="tcheck">
+                      <option value="OR" selected>OR</option>
+                      <option value="AND">AND</option>
+                  </select>
+                  <input type="text" class="form-control text-center" style="padding:10px;" name="title" placeholder="Title">
+                  <select name="ycheck">
+                      <option value="OR" selected>OR</option>
+                      <option value="AND">AND</option>
+                  </select>
                   <input type="text" class="form-control text-center" style="padding:10px;" name="year" placeholder="Year">
+                  <select name="ccheck">
+                      <option value="OR" selected>OR</option>
+                      <option value="AND">AND</option>
+                  </select>
                   <input type="text" class="form-control text-center" style="padding:10px;" name="category" placeholder="Category">
                   <span class="form-group-btn">
                       <input class="btn btn-primary text-center" style="margin-left:34%;margin-top:10px;" type="submit">

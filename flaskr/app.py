@@ -167,26 +167,33 @@ def search():
         title = request.form['title']
         year = request.form['year']
         category = request.form['category']
+        
+        if (author == "" and title == "" and year == "" and category == ""):
+            return "No search query given"
         with sqlite3.connect(DATABASE) as c:
             cur = c.cursor()
             query = 'SELECT * FROM blog WHERE '
             if author != "":
                 query += 'username LIKE \'%'+author+'%\''
             if title != "":
-                if len(query) > len('SELECT * FROM blog WHERE '):
-                    query += ' OR '
+                if len(query) > 26:
+                    query += ' ' + request.form['tcheck'] + ' '
                 query += 'title LIKE \'%'+title+'%\''
-            # if author != "":
-            #     query += '\'%'+author+'%\''
+            if year != "":
+                if len(query) > 26:
+                    query += ' ' + request.form['ycheck'] + ' '
+                query += 'date LIKE \''+year+'%\''
             if category != "":
-                if len(query) > len('SELECT * FROM blog WHERE '):
-                    query += ' OR '
+                if len(query) > 26:
+                    query += ' ' + request.form['ccheck'] + ' '
                 query += 'id IN (SELECT blog_id FROM category WHERE type = ?);'
                 cur.execute(query, [category])
             else:
                 cur.execute(query + ';')
                 
             blogs = cur.fetchall()
+            if len(blogs) == 0:
+                return "No blogs match your search query"
             return render_template('search.html',blogs=blogs)
             c.close()
 
