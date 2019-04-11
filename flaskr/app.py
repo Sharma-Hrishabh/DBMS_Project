@@ -22,23 +22,23 @@ app = Flask(__name__)
 conn = sqlite3.connect(DATABASE)
 c = conn.cursor()
 c.execute('''CREATE TABLE IF NOT EXISTS blog (id integer, title varchar(64), slug varchar(32),
-        body text, date text, username varchar(16), PRIMARY KEY (id), 
+        body text, date text, username varchar(16), PRIMARY KEY (id),
         FOREIGN KEY(username) REFERENCES users(username));''')
 
 c.execute('''CREATE TABLE IF NOT EXISTS users(username varchar(16), password varchar(64),
         join_date text, name varchar(32), PRIMARY KEY(username));''')
-        
+
 c.execute('''CREATE TABLE IF NOT EXISTS email (mail varchar(64), username varchar(16),
         FOREIGN KEY(username) REFERENCES users(username), PRIMARY KEY(mail, username));''')
-        
+
 c.execute('''CREATE TABLE IF NOT EXISTS wow (blog_id integer, username varchar(16), status integer,
-        FOREIGN KEY(blog_id) REFERENCES blog(id), FOREIGN KEY(username) REFERENCES users(username), 
+        FOREIGN KEY(blog_id) REFERENCES blog(id), FOREIGN KEY(username) REFERENCES users(username),
         PRIMARY KEY(blog_id, username));''')
-        
+
 c.execute('''CREATE TABLE IF NOT EXISTS comment (id integer, username varchar(16), data text,
         blog_id integer, date text, PRIMARY KEY(id), FOREIGN KEY(blog_id) REFERENCES blog(id),
         FOREIGN KEY(username) REFERENCES users(username));''')
-        
+
 c.execute('''CREATE TABLE IF NOT EXISTS category (blog_id integer, type varchar(16),
         FOREIGN KEY(blog_id) REFERENCES blog(id), PRIMARY KEY(blog_id, type));''')
 
@@ -50,8 +50,8 @@ conn.commit()
 conn.close()
 # print(c.fetchone())
 @app.route('/')
-def hello():
-    return "Hello World!"
+def index():
+    return render_template('index.html')
 
 @app.route('/signup/',methods=['POST', 'GET'])
 def signup():
