@@ -1,10 +1,12 @@
-from flask import Flask,render_template,request
+from flask import Flask,render_template,request, session, flash
 import sqlite3
+import datetime
 from flask import g
 import hashlib
 DATABASE = '../database.db'
 
 app = Flask(__name__)
+app.secret_key = "thisisaserceretkey"
 
 # def get_db():
 #     db = getattr(g, '_database', None)
@@ -21,25 +23,27 @@ app = Flask(__name__)
 
 conn = sqlite3.connect(DATABASE)
 c = conn.cursor()
-c.execute('''CREATE TABLE IF NOT EXISTS blog (id integer, title varchar(64), slug varchar(32),
-        body text, date text, username varchar(16), PRIMARY KEY (id),
-        FOREIGN KEY(username) REFERENCES users(username));''')
+c.execute('''CREATE TABLE IF NOT EXISTS blog (id integer AUTO_INCREMENT, title varchar(64) NOT NULL,
+        slug varchar(32) NOT NULL, body text NOT NULL, date text, username varchar(16) NOT NULL,
+        PRIMARY KEY (id), FOREIGN KEY(username) REFERENCES users(username));''')
 
-c.execute('''CREATE TABLE IF NOT EXISTS users(username varchar(16), password varchar(64),
-        join_date text, name varchar(32), PRIMARY KEY(username));''')
-
+c.execute('''CREATE TABLE IF NOT EXISTS users(username varchar(16), password varchar(64) NOT NULL,
+        join_date text, name varchar(32) NOT NULL, PRIMARY KEY(username));''')
+        
 c.execute('''CREATE TABLE IF NOT EXISTS email (mail varchar(64), username varchar(16),
-        FOREIGN KEY(username) REFERENCES users(username), PRIMARY KEY(mail, username));''')
+        FOREIGN KEY(username) REFERENCES users(username), PRIMARY KEY(mail, username),
+        UNIQUE(mail, username));''')
+        
+c.execute('''CREATE TABLE IF NOT EXISTS wow (blog_id integer NOT NULL, username varchar(16) NOT NULL,
+        status integer NOT NULL, FOREIGN KEY(blog_id) REFERENCES blog(id),
+        FOREIGN KEY(username) REFERENCES users(username), PRIMARY KEY(blog_id, username));''')
 
-c.execute('''CREATE TABLE IF NOT EXISTS wow (blog_id integer, username varchar(16), status integer,
-        FOREIGN KEY(blog_id) REFERENCES blog(id), FOREIGN KEY(username) REFERENCES users(username),
-        PRIMARY KEY(blog_id, username));''')
+c.execute('''CREATE TABLE IF NOT EXISTS comment (id integer AUTO_INCREMENT, username varchar(16) NOT NULL,
+        data text NOT NULL, blog_id integer NOT NULL, date text NOT NULL,
+        PRIMARY KEY(id), FOREIGN KEY(blog_id) REFERENCES blog(id),
+        FOREIGN KEY(username) REFERENCES users(username))''')
 
-c.execute('''CREATE TABLE IF NOT EXISTS comment (id integer, username varchar(16), data text,
-        blog_id integer, date text, PRIMARY KEY(id), FOREIGN KEY(blog_id) REFERENCES blog(id),
-        FOREIGN KEY(username) REFERENCES users(username));''')
-
-c.execute('''CREATE TABLE IF NOT EXISTS category (blog_id integer, type varchar(16),
+c.execute('''CREATE TABLE IF NOT EXISTS category (blog_id integer NOT NULL, type varchar(16) NOT NULL,
         FOREIGN KEY(blog_id) REFERENCES blog(id), PRIMARY KEY(blog_id, type));''')
 
 # c.execute("INSERT INTO users VALUES ('hri','abc','xyz@gmail.com','Hrishabh');")
@@ -66,11 +70,12 @@ def signup():
             actualpass=password+salt
             h = hashlib.md5(actualpass.encode())
             print(h.hexdigest())
-            cur.execute('INSERT INTO users VALUES(?, ?, ?, ?);',(username,h.hexdigest(),email,name))
+            cur.execute('INSERT INTO users VALUES(?, ?, ?, ?);',(username,h.hexdigest(),str(datetime.datetime.utcnow()),name))
+            cur.execute('INSERT INTO email VALUES(?, ?);', (email, username))
             con.commit()
-            con.close()
             print(name)
             return "Name : "+request.method+"  "+username
+            con.close()
     else:
         return render_template('signup.html')
 
@@ -85,8 +90,8 @@ def login():
             received_pass = password+'5xy'
             h = hashlib.md5(received_pass.encode())
             print(h.hexdigest())
-            data = cur.execute("SELECT * FROM users WHERE username = (%s)",username)
-            data = c.fetchone()[1]
+            data = cur.execute("SELECT * FROM users WHERE username = ?",[username])
+            data = cur.fetchone()[1]
             print(data)
             if h.hexdigest() == data:
                 session['logged_in']=True
@@ -99,6 +104,16 @@ def login():
     else:
         return render_template('login.html')
 
+@app.route('/test/',methods=['GET'])
+def test():
+    if (session.get('logged_in') != None):
+        if (session.get('logged_in') == True):
+            return session['username'] + ' is Logged in'
+        else:
+            return session['username'] + ' is Logged Out'
+    else:
+        print(session.get('logged_in'))
+        return 'Undefined User'
 
 if __name__ == '__main__':
     app.run(port=5001,debug = True)
