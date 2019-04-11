@@ -124,11 +124,14 @@ def create_blog():
             title = request.form['title']
             slug = request.form['slug']
             body = request.form['body']
-            art = request.form['art']
-            science = request.form['science']
-            technology = request.form['technology']
-            computer = request.form['computer']
-            print(title)
+            art = request.form.getlist('art')
+            science = request.form.getlist('science')
+            technology = request.form.getlist('technology')
+            computer = request.form.getlist('computer')
+            print(art)
+            print(science)
+            print(technology)
+            print(computer)
             return "Created"
     else:
         return render_template('create_blog.html')
