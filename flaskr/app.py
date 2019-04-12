@@ -99,28 +99,36 @@ def signup():
 @app.route('/login/',methods=['POST', 'GET'])
 def login():
     print(request.method+"")
-    if request.method=='POST':
-        with sqlite3.connect(DATABASE) as c:
-            cur = c.cursor()
-            username = request.form['username']
-            password = request.form['password']
-            received_pass = password+'5xy'
-            h = hashlib.md5(received_pass.encode())
-            print(h.hexdigest())
-            data = cur.execute("SELECT * FROM users WHERE username = ?",[username])
-            data = cur.fetchone()[1]
-            print(data)
-            if h.hexdigest() == data:
-                session['logged_in']=True
-                session['username']=username
-                flash('You are now logged in')
-                print('You are logged in')
-                return('Login Successful!')
-            else:
-                return("Invalid credentials!")
-            c.close()
+    if session.get('logged_in'):
+        return "<script>alert('You are already logged in');window.location = 'http://localhost:5000/';</script>"
     else:
-        return render_template('login.html')
+        if request.method=='POST':
+            with sqlite3.connect(DATABASE) as c:
+                cur = c.cursor()
+                username = request.form['username']
+                password = request.form['password']
+                received_pass = password+'5xy'
+                h = hashlib.md5(received_pass.encode())
+                print(h.hexdigest())
+                data = cur.execute("SELECT * FROM users WHERE username = ?",[username])
+                data = cur.fetchall()
+                print(len(data))
+                if len(data) > 0:
+                    data = data[0][1]
+                    print(data)
+                    if h.hexdigest() == data:
+                        session['logged_in']=True
+                        session['username']=username
+                        flash('You are now logged in')
+                        print('You are logged in')
+                        return('Login Successful!')
+                    else:
+                        return("Invalid credentials!")
+                else:
+                    return "User not registered"
+                c.close()
+        else:
+            return render_template('login.html')
 
 @app.route('/test/',methods=['GET'])
 def test():
@@ -316,12 +324,21 @@ def wow(slug, id):
     if session.get('username'):
         with sqlite3.connect(DATABASE) as c:
             cur = c.cursor()
-            cur.execute('INSERT INTO wow VALUES (?, ?, ?)', (id, session['username'], 1))
+            val = 0
+            cur.execute('SELECT * FROM wow WHERE username LIKE ? AND blog_id = ?;', (session['username'], id))
+            data = cur.fetchall()
+            if len(data) > 0:
+                cur.execute('DELETE FROM wow WHERE username LIKE ? AND blog_id = ?;', (session['username'], id))
+                val = -1
+            else:
+                cur.execute('INSERT INTO wow VALUES (?, ?, ?)', (id, session['username'], 1))
+                val = 1
             c.commit()
-            return "done"
+            return str(val)
             c.close()
     else:
-        return "User not logged in"
+        print("user not logged in")
+        return str(0)
 
 # @app.route('/wow', methods=['POST'])
 # def www():

@@ -79,8 +79,10 @@ Wows: <i id="wow-count">{{ wows }}</i></h4>
               type: "POST",
               url: window.location.href+"/wow",
               cache: false,
-              success: function(){
-                document.getElementById('wow-count').innerHTML = parseInt(document.getElementById('wow-count').innerHTML) +1;
+              success: function(data){
+                document.getElementById('wow-count').innerHTML = parseInt(document.getElementById('wow-count').innerHTML) +parseInt(data.toString());
+                console.log(JSON.stringify(data));
+                
               },
               error: function(XMLHttpRequest, textStatus, errorThrown) { 
                   console.log("Something went wrong:\n"+errorThrown)
