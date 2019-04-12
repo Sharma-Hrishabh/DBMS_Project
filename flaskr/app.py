@@ -167,11 +167,42 @@ def search():
         title = request.form['title']
         year = request.form['year']
         category = request.form['category']
+        
+        if (author == "" and title == "" and year == "" and category == ""):
+            return "No search query given"
         with sqlite3.connect(DATABASE) as c:
             cur = c.cursor()
-            cur.execute('SELECT * FROM blog WHERE username LIKE \'%'+author+'%\' OR title LIKE \'%'+title+'%\' OR id IN (SELECT blog_id FROM category WHERE type = ?);', [category])
-            print(cur.fetchall())
-            return cur.fetchall()
+            query = 'SELECT * FROM blog WHERE '
+            if author != "":
+                query += 'username LIKE \'%'+author+'%\''
+            if title != "":
+                if len(query) > 26:
+                    query += ' ' + request.form['tcheck'] + ' '
+                query += 'title LIKE \'%'+title+'%\''
+            if year != "":
+                if len(query) > 26:
+                    query += ' ' + request.form['ycheck'] + ' '
+                query += 'date LIKE \''+year+'%\''
+            if category != "":
+                if len(query) > 26:
+                    query += ' ' + request.form['ccheck'] + ' '
+                    query += 'id IN (SELECT blog_id FROM category WHERE type = ?)'
+                if author != "":
+                    query += ' OR username IN (SELECT username FROM users WHERE name LIKE ?);'
+                    cur.execute(query, (category, author))
+                else:
+                    cur.execute(query + ';', [category])
+            else:
+                if author != "":
+                    query += ' OR username IN (SELECT username FROM users WHERE name LIKE ?);'
+                    cur.execute(query, [author])
+                else:
+                    cur.execute(query + ';')
+                
+            blogs = cur.fetchall()
+            if len(blogs) == 0:
+                return "No blogs match your search query"
+            return render_template('search.html',blogs=blogs)
             c.close()
 
 @app.route('/blog/<slug>/<id>', methods=['GET'])
@@ -181,8 +212,87 @@ def blog(slug, id):
         cur = c.cursor()
         cur.execute('SELECT * FROM blog where id = ?', [id])
         blog = cur.fetchall()[0]
+        cur.execute('SELECT count(*) FROM wow WHERE blog_id = ?', [id])
+        wows = cur.fetchone()[0]
+        cur.execute('SELECT type FROM category WHERE blog_id = ?', [id])
         return render_template('blog_view.html',blog=blog)
 
+@app.route('/blog/<slug>/<id>/edit', methods=['GET', 'POST'])
+def blogedit(slug, id):
+    print(slug, id)
+    if request.method == 'POST':
+        with sqlite3.connect(DATABASE) as c:
+            cur = c.cursor()
+            title = request.form['title']
+            body = request.form['body']
+            art = request.form.getlist('art')
+            science = request.form.getlist('science')
+            technology = request.form.getlist('technology')
+            computer = request.form.getlist('computer')
+            cur.execute('UPDATE blog SET body = ?, title = ? where id = ?', (body, title, id))
+            
+            cur.execute('DELETE FROM category WHERE blog_id = ?', [id])
+            if len(art) and art[0] == 'on':
+                i = cur.execute('INSERT INTO category VALUES(?, ?)', (id, 'art'))
+            if len(science) and science[0] == 'on':
+                i = cur.execute('INSERT INTO category VALUES(?, ?)', (id, 'science'))
+            if len(technology) and technology[0] == 'on':
+                i = cur.execute('INSERT INTO category VALUES(?, ?)', (id, 'technology'))
+            if len(computer) and computer[0] == 'on':
+                i = cur.execute('INSERT INTO category VALUES(?, ?)', (id, 'computer'))
+            c.commit()
+            return redirect("http://localhost:5000/blog/"+slug+"/"+id, code=200)
+            c.close()
+    elif request.method == 'GET':
+        with sqlite3.connect(DATABASE) as c:
+            cur = c.cursor()
+            cur.execute('SELECT * FROM blog where id = ?', [id])
+            blog = cur.fetchall()[0]
+            cur.execute('SELECT type FROM category WHERE blog_id = ?', [id])
+            return render_template('blog_view.html',blog=blog)
+            c.close()
+
+@app.route('/user/<username>', methods=['GET', 'POST'])
+def user(username):
+    if request.method == 'GET':
+        with sqlite3.connect(DATABASE) as c:
+            if session.get('username'):
+                username = session['username']
+                print(username)
+                cur = c.cursor()
+                cur.execute('SELECT * FROM users NATURAL JOIN email WHERE username LIKE ?;', [username])
+                print(cur.fetchall())
+                if len(cur.fetchall()) == 0:
+                    return "user not in database"
+                else:
+                    return cur.fetchone()
+                c.close()
+            else:
+                return "User not logged in"
+    elif request.method == 'POST':
+        username = ""
+        if session.get('username'):
+            username = session['username']
+        else:
+            return "User not logged in"
+        name = request.form['name']
+        mail = request.form['mail']
+        password = request.form['password']+'5xy'
+        password = hashlib.md5(password.encode()).hexdigest()
+        with sqlite3.connect(DATABASE) as c:
+            cur = c.cursor()
+            cur.execute('UPDATE email SET mail = ? WHERE username LIKE ?;', (mail, username))
+            cur.execute('UPDATE users SET name = ?, password = ? WHERE username LIKE ?;', (name, password, username))
+            c.commit()
+            return redirect("http://localhost:5000/user/"+username, code=200)
+            c.close()
+
+@app.route('/logout', methods=['GET', 'POST'])
+def logout():
+    print(session.keys())
+    session.clear()
+    print(session.keys())
+    return redirect("http://localhost:5000")
 
 if __name__ == '__main__':
     app.run(port=5001,debug = True)
