@@ -60,7 +60,7 @@ def index():
         cur = c.cursor()
         cur.execute('SELECT * FROM blog ORDER BY date LIMIT 10;')
         blogs = cur.fetchall()
-        print(blogs)
+        # print(blogs)
         return render_template('index.html',blogs=blogs)
         c.close()
 
@@ -167,7 +167,7 @@ def search():
         title = request.form['title']
         year = request.form['year']
         category = request.form['category']
-        
+
         if (author == "" and title == "" and year == "" and category == ""):
             return "No search query given"
         with sqlite3.connect(DATABASE) as c:
@@ -198,7 +198,7 @@ def search():
                     cur.execute(query, [author])
                 else:
                     cur.execute(query + ';')
-                
+
             blogs = cur.fetchall()
             if len(blogs) == 0:
                 return "No blogs match your search query"
@@ -215,7 +215,9 @@ def blog(slug, id):
         cur.execute('SELECT count(*) FROM wow WHERE blog_id = ?', [id])
         wows = cur.fetchone()[0]
         cur.execute('SELECT type FROM category WHERE blog_id = ?', [id])
-        return render_template('blog_view.html',blog=blog)
+        category = cur.fetchall()
+        print(wows)
+        return render_template('blog_view.html',blog=blog,wows=wows,category=category)
 
 @app.route('/blog/<slug>/<id>/edit', methods=['GET', 'POST'])
 def blogedit(slug, id):
@@ -230,7 +232,7 @@ def blogedit(slug, id):
             technology = request.form.getlist('technology')
             computer = request.form.getlist('computer')
             cur.execute('UPDATE blog SET body = ?, title = ? where id = ?', (body, title, id))
-            
+
             cur.execute('DELETE FROM category WHERE blog_id = ?', [id])
             if len(art) and art[0] == 'on':
                 i = cur.execute('INSERT INTO category VALUES(?, ?)', (id, 'art'))
