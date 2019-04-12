@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+    <link rel="stylesheet" href="..assets/css/style.css">
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
+</head>
+  <body>
+
+    <!-- NAVBAR -->
+
+    <div class="container">
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <a class="navbar-brand" href="#">BLOG-DOM</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav">
+        <li class="nav-item active">
+          <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#">Blogs</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#">About</a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+  </div>
+
+
+    <!-- create_blog_form -->
+    <h1 class="text-center">EDIT BLOG</h1>
+    <div class="container" margin-top:10%;>
+    <form method="POST">
+      <div class="form-group">
+        <label for="title">Title</label>
+        <input type="text" class="form-control" name="title" id="title" value="{{ blog[1] }}" placeholder="Title">
+        <label for="slug">Slug</label>
+        <input type="text" class="form-control" name="slug" id="slug"  value="{{ blog[2] }}" placeholder="Slug">
+      </div>
+      <div class="form-group">
+        <label for="category">Category</label>
+
+        <div class="custom-control custom-checkbox">
+  <input type="checkbox" class="custom-control-input" name="art" id="Art">
+  <label class="custom-control-label" for="Art">Art</label>
+</div>
+        <div class="custom-control custom-checkbox">
+  <input type="checkbox" class="custom-control-input" name="science" id="Science">
+  <label class="custom-control-label" for="Science">Science</label>
+</div>
+        <div class="custom-control custom-checkbox">
+  <input type="checkbox" class="custom-control-input" name="technology" id="Technology">
+  <label class="custom-control-label" for="Technology">Technology</label>
+</div>
+        <div class="custom-control custom-checkbox">
+  <input type="checkbox" class="custom-control-input" name="computer" id="Computer">
+  <label class="custom-control-label" for="Computer">Computer</label>
+</div>
+      </div>
+      <div class="form-group">
+        <label for="body">Body</label>
+        <textarea class="form-control" name="body" value="{{ blog[3] }}" id="body" rows="3"></textarea>
+      </div>
+      <input type="submit" class="btn btn-primary">
+    </form>
+</div>
+
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+    <!-- <script src="../assets/js/script.js"></script> -->
+    <script>
+    const titleInput = document.querySelector('input[name=title]');
+    const slugInput = document.querySelector('input[name=slug]');
+
+    const slugify = (val) => {
+
+        return val.toString().toLowerCase().trim()
+            .replace(/&/g, '-and-')         // Replace & with 'and'
+            .replace(/[\s\W-]+/g, '-')      // Replace spaces, non-word characters and dashes with a single dash (-)
+
+    };
+
+    titleInput.addEventListener('keyup', (e) => {
+        slugInput.setAttribute('value', slugify(titleInput.value));
+    });
+
+    </script>
+    <script type="text/javascript">
+      //   const checked=[]
+      //
+      // document.getElementsByName('technology')[0].value=
+    </script>
+  </body>
+</html>

@@ -234,12 +234,13 @@ def blogedit(slug, id):
         with sqlite3.connect(DATABASE) as c:
             cur = c.cursor()
             title = request.form['title']
+            slug1 = request.form['slug']
             body = request.form['body']
             art = request.form.getlist('art')
             science = request.form.getlist('science')
             technology = request.form.getlist('technology')
             computer = request.form.getlist('computer')
-            cur.execute('UPDATE blog SET body = ?, title = ? where id = ?', (body, title, id))
+            cur.execute('UPDATE blog SET body = ?, title = ? , slug = ? where id = ?', (body, title , slug1 , id))
 
             cur.execute('DELETE FROM category WHERE blog_id = ?', [id])
             if len(art) and art[0] == 'on':
@@ -251,7 +252,7 @@ def blogedit(slug, id):
             if len(computer) and computer[0] == 'on':
                 i = cur.execute('INSERT INTO category VALUES(?, ?)', (id, 'computer'))
             c.commit()
-            return redirect("http://localhost:5000/blog/"+slug+"/"+id, code=200)
+            return redirect("http://localhost:5000/blog/"+slug1+"/"+id, code=200)
             c.close()
     elif request.method == 'GET':
         with sqlite3.connect(DATABASE) as c:
@@ -259,7 +260,7 @@ def blogedit(slug, id):
             cur.execute('SELECT * FROM blog where id = ?', [id])
             blog = cur.fetchall()[0]
             cur.execute('SELECT type FROM category WHERE blog_id = ?', [id])
-            return render_template('blog_view.html',blog=blog)
+            return render_template('blogedit.html',blog=blog)
             c.close()
 
 @app.route('/user/<username>', methods=['GET', 'POST'])
