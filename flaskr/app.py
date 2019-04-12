@@ -266,7 +266,7 @@ def blogedit(slug, id):
             cur.execute('SELECT * FROM blog where id = ?', [id])
             blog = cur.fetchall()[0]
             cur.execute('SELECT type FROM category WHERE blog_id = ?', [id])
-            return render_template('blogedit.html',blog=blog)
+            return render_template('blogedit.html',blog=blog, cat=cur.fetchall())
             c.close()
 
 @app.route('/user/<username>', methods=['GET', 'POST'])
