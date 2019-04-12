@@ -47,6 +47,12 @@ c.execute('''CREATE TABLE IF NOT EXISTS comment (id integer NOT NULL, username v
 c.execute('''CREATE TABLE IF NOT EXISTS category (blog_id integer NOT NULL, type varchar(16) NOT NULL,
         FOREIGN KEY(blog_id) REFERENCES blog(id), PRIMARY KEY(blog_id, type));''')
 
+
+# Indexing
+
+c.execute('CREATE INDEX IF NOT EXISTS idx_id_blog on blog(id);')
+c.execute('CREATE INDEX IF NOT EXISTS idx_username_users on users(username);')
+c.execute('CREATE INDEX IF NOT EXISTS idx_title_blog on blog(title);')
 # c.execute("INSERT INTO users VALUES ('hri','abc','xyz@gmail.com','Hrishabh');")
 # c.execute("INSERT INTO blog VALUES ('1','qwe','qwe','dvfdvfdvfdvdfvfdv','2006-01-05');")
 # c.execute('SELECT * FROM blog;')
