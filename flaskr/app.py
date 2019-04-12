@@ -65,7 +65,7 @@ conn.close()
 def index():
     with sqlite3.connect(DATABASE) as c:
         cur = c.cursor()
-        cur.execute('SELECT * FROM blog ORDER BY date LIMIT 10;')
+        cur.execute('SELECT * FROM blog ORDER BY date DESC LIMIT 10;')
         blogs = cur.fetchall()
         # print(blogs)
         if session.get('logged_in'):
