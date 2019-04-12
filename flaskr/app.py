@@ -221,7 +221,11 @@ def blog(slug, id):
         cur.execute('SELECT type FROM category WHERE blog_id = ?', [id])
         category = cur.fetchall()
         # print(wows)
-        return render_template('blog_view.html',blog=blog,wows=wows,category=category)
+        if session.get('logged_in'):
+            curruser = session['username']
+            return render_template('blog_view.html',blog=blog,wows=wows,category=category,loginstatus='True',curruser=curruser)
+        else:
+            return render_template('blog_view.html',blog=blog,wows=wows,category=category,loginstatus='False')
 
 @app.route('/blog/<slug>/<id>/edit', methods=['GET', 'POST'])
 def blogedit(slug, id):

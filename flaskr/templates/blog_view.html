@@ -33,6 +33,20 @@
           <a class="nav-link" href="#">About</a>
         </li>
       </ul>
+      <ul class="navbar-nav ml-auto">
+        {% if loginstatus=='True' %}
+        <li class="nav-item">
+          <a class="nav-link" href="#">Hey, {{ curruser }}</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/logout/">Logout</a>
+        </li>
+        {% else %}
+        <li class="nav-item">
+          <a class="nav-link" href="/login/">Login</a>
+        </li>
+        {% endif %}
+      </ul>
     </div>
   </nav>
   </div>
