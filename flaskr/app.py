@@ -26,26 +26,27 @@ conn = sqlite3.connect(DATABASE)
 c = conn.cursor()
 c.execute('''CREATE TABLE IF NOT EXISTS blog (id integer NOT NULL, title varchar(64) NOT NULL,
         slug varchar(32) NOT NULL, body text NOT NULL, date text, username varchar(16) NOT NULL,
-        PRIMARY KEY (id), FOREIGN KEY(username) REFERENCES users(username));''')
+        PRIMARY KEY (id), FOREIGN KEY(username) REFERENCES users(username) ON DELETE CASCADE ON UPDATE CASCADE);''')
 
 c.execute('''CREATE TABLE IF NOT EXISTS users(username varchar(16) NOT NULL, password varchar(64) NOT NULL,
         join_date text, name varchar(32) NOT NULL, PRIMARY KEY(username));''')
 
 c.execute('''CREATE TABLE IF NOT EXISTS email (mail varchar(64) NOT NULL, username varchar(16),
-        FOREIGN KEY(username) REFERENCES users(username), PRIMARY KEY(mail, username),
-        UNIQUE(mail, username));''')
+        FOREIGN KEY(username) REFERENCES users(username) ON DELETE CASCADE ON UPDATE CASCADE ,
+        PRIMARY KEY(mail, username), UNIQUE(mail, username));''')
 
 c.execute('''CREATE TABLE IF NOT EXISTS wow (blog_id integer NOT NULL, username varchar(16) NOT NULL,
-        status integer NOT NULL, FOREIGN KEY(blog_id) REFERENCES blog(id),
-        FOREIGN KEY(username) REFERENCES users(username), PRIMARY KEY(blog_id, username));''')
+        status integer NOT NULL, FOREIGN KEY(blog_id) REFERENCES blog(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY(username) REFERENCES users(username) ON DELETE CASCADE ON UPDATE CASCADE,
+        PRIMARY KEY(blog_id, username));''')
 
 c.execute('''CREATE TABLE IF NOT EXISTS comment (id integer NOT NULL, username varchar(16) NOT NULL,
         data text NOT NULL, blog_id integer NOT NULL, date text NOT NULL,
-        PRIMARY KEY(id), FOREIGN KEY(blog_id) REFERENCES blog(id),
-        FOREIGN KEY(username) REFERENCES users(username))''')
+        PRIMARY KEY(id), FOREIGN KEY(blog_id) REFERENCES blog(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY(username) REFERENCES users(username) ON DELETE CASCADE ON UPDATE CASCADE)''')
 
 c.execute('''CREATE TABLE IF NOT EXISTS category (blog_id integer NOT NULL, type varchar(16) NOT NULL,
-        FOREIGN KEY(blog_id) REFERENCES blog(id), PRIMARY KEY(blog_id, type));''')
+        FOREIGN KEY(blog_id) REFERENCES blog(id) ON DELETE CASCADE ON UPDATE CASCADE, PRIMARY KEY(blog_id, type));''')
 
 
 # Indexing
