@@ -1,4 +1,4 @@
-from flask import Flask,render_template,request, session, flash
+from flask import Flask,render_template,request, session, flash,redirect
 import sqlite3
 import json
 import datetime, time
@@ -61,7 +61,11 @@ def index():
         cur.execute('SELECT * FROM blog ORDER BY date LIMIT 10;')
         blogs = cur.fetchall()
         # print(blogs)
-        return render_template('index.html',blogs=blogs)
+        if session.get('logged_in'):
+            curruser = session['username']
+            return render_template('index.html',blogs=blogs,loginstatus='True',curruser=curruser)
+        else:
+            return render_template('index.html',blogs=blogs,loginstatus='False')
         c.close()
 
 @app.route('/signup/',methods=['POST', 'GET'])
@@ -216,7 +220,7 @@ def blog(slug, id):
         wows = cur.fetchone()[0]
         cur.execute('SELECT type FROM category WHERE blog_id = ?', [id])
         category = cur.fetchall()
-        print(wows)
+        # print(wows)
         return render_template('blog_view.html',blog=blog,wows=wows,category=category)
 
 @app.route('/blog/<slug>/<id>/edit', methods=['GET', 'POST'])
@@ -289,7 +293,7 @@ def user(username):
             return redirect("http://localhost:5000/user/"+username, code=200)
             c.close()
 
-@app.route('/logout', methods=['GET', 'POST'])
+@app.route('/logout/', methods=['GET', 'POST'])
 def logout():
     print(session.keys())
     session.clear()
