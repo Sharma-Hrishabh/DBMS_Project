@@ -304,6 +304,23 @@ def logout():
     session.clear()
     print(session.keys())
     return redirect("http://localhost:5000")
+    
+@app.route('/blog/<slug>/<id>/wow/', methods=['POST'])
+def wow(slug, id):
+    if session.get('username'):
+        with sqlite3.connect(DATABASE) as c:
+            cur = c.cursor()
+            cur.execute('INSERT INTO wow VALUES (?, ?, ?)', (id, session['username'], 1))
+            c.commit()
+            return "done"
+            c.close()
+    else:
+        return "User not logged in"
+
+# @app.route('/wow', methods=['POST'])
+# def www():
+#     print('Caught you')
+#     return "done"
 
 if __name__ == '__main__':
     app.run(port=5001,debug = True)
